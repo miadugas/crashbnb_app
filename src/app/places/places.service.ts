@@ -1,4 +1,3 @@
-import { findLast } from '@angular/compiler/src/directive_resolver';
 import { Injectable } from '@angular/core';
 
 import { Place } from './place.model';
