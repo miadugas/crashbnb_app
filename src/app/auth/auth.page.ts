@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { LoadingController } from '@ionic/angular';
@@ -10,7 +11,8 @@ import { AuthService } from './auth.service';
   styleUrls: ['./auth.page.scss']
 })
 export class AuthPage implements OnInit {
-  isLoading =false;
+  isLoading = false;
+  isLogin = true;
 
   constructor(
     private authService: AuthService, 
@@ -34,4 +36,14 @@ export class AuthPage implements OnInit {
         }, 1500);
       });
   }
+
+  onSwitchAuthMode(){
+    this.isLogin = !this.isLogin;
+  }
+  
+  onSubmit(form: NgForm) {
+    console.log(form);
+  }
+
+
 }
