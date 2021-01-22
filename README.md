@@ -1,5 +1,5 @@
 # CrashBnB App
 
-AirBnB clone
+AirBnB clone made with Ionic & Angular
 
 
