@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { 
   NavController, 
@@ -6,6 +6,7 @@ import {
   ActionSheetController 
 } from '@ionic/angular';
 
+import { Subscription } from 'rxjs';
 import { PlacesService } from '../../places.service';
 import { Place } from '../../place.model';
 import { CreateBookingComponent } from '../../../bookings/create-booking/create-booking.component';
@@ -16,8 +17,9 @@ import { CreateBookingComponent } from '../../../bookings/create-booking/create-
   styleUrls: ['./place-detail.page.scss']
 })
 
-export class PlaceDetailPage implements OnInit {
+export class PlaceDetailPage implements OnInit, OnDestroy {
   place: Place;
+  private placeSub: Subscription;
 
   constructor(
     private navCtrl: NavController,
@@ -33,7 +35,13 @@ export class PlaceDetailPage implements OnInit {
         this.navCtrl.navigateBack('/places/tabs/discover');
         return;
       }
-      this.place = this.placesService.getPlace(paramMap.get('placeId'));
+      //this.place = 
+      //this.placesService.getPlace(paramMap.get('placeId'))
+      this.placeSub = this.placesService
+         .getPlace(paramMap.get('placeId'))
+         .subscribe(place => {
+           this.place = place;
+         });
     });
   }
 
@@ -41,7 +49,8 @@ export class PlaceDetailPage implements OnInit {
     // this.router.navigateByUrl('/places/tabs/discover');
     // this.navCtrl.navigateBack('/places/tabs/discover');
     // this.navCtrl.pop();
-    this.actionSheetCtrl.create({
+    this.actionSheetCtrl
+    .create({
       header: 'Choose an Action',
       buttons: [
         {
@@ -65,11 +74,7 @@ export class PlaceDetailPage implements OnInit {
     })
     .then(actionSheetEl => {
       actionSheetEl.present();
-    }  
-      
-      )
-    
-    
+    });  
   }
 
     openBookingModal(mode: 'select' | 'random') {
@@ -89,6 +94,12 @@ export class PlaceDetailPage implements OnInit {
             console.log('BOOKED!');
           }
         });
+    }
+    
+    ngOnDestroy() {
+      if (this.placeSub) {
+        this.placeSub.unsubscribe();
+      }
     }
   }
   
