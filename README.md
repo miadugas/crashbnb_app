@@ -5,7 +5,7 @@ This app will be a hybrid AirBnB / Yelp app where users can create accounts, boo
 
 Design concept by Mia Dugas & Made with Ionic & Angular.
 
-![Image of iLoftz](https://github.com/miadugas/codecamper_api/blob/master/codecamperapi.jpg)
+![Image of iLoftz](https://github.com/miadugas/crashbnb_app/blob/main/prototype-iLoftz-001.png)
 
 =======
 
