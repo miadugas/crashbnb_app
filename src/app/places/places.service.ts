@@ -65,8 +65,7 @@ export class PlacesService {
 
   fetchPlaces() {
     return this.http
-      .get<
-      { [key: string]: PlaceData }>
+      .get<{ [key: string]: PlaceData }>
       (
         'https://iloftz-default-rtdb.firebaseio.com/offered-places.json'
       )
@@ -153,31 +152,33 @@ export class PlacesService {
     // );
   }
 
-  // Updating a listing
-  updatePlace(placeId: string, title: string, description: string) {
-    //let updatedPlaces: Place[];
-    return this.places.pipe(
-      take(1),
-     // switchMap(places => {
-
-      delay(1500),
-      tap(places => {
-        const updatedPlaceIndex = places.findIndex(pl => pl.id === placeId);
-        const updatedPlaces = [...places];
-        const oldPlace = updatedPlaces[updatedPlaceIndex];
-        updatedPlaces[updatedPlaceIndex] = new Place(
-          oldPlace.id,
-          title,
-          description,
-          oldPlace.imageUrl,
-          oldPlace.price,
-          oldPlace.availableFrom,
-          oldPlace.availableTo,
-          oldPlace.userId
-        );
-        this._places.next(updatedPlaces);
-      })
-    );
-  }
+// Updating a listing
+updatePlace(placeId: string, title: string, description: string) {
+  let updatedPlaces: Place[];
+  return this.places.pipe(
+    take(1),
+      switchMap(places => {
+          const updatedPlaceIndex = places.findIndex(pl => pl.id === placeId);
+          updatedPlaces = [...places];
+          const oldPlace = updatedPlaces[updatedPlaceIndex];
+          updatedPlaces[updatedPlaceIndex] = new Place(
+            oldPlace.id,
+            title,
+            description,
+            oldPlace.imageUrl,
+            oldPlace.price,
+            oldPlace.availableFrom,
+            oldPlace.availableTo,
+            oldPlace.userId
+          );
+return this.http.put(
+  `https://iloftz-default-rtdb.firebaseio.com/offered-places/${placeId}.json`,
+    { ...updatedPlaces[updatedPlaceIndex], id: null }
+  );
+  }), 
+  tap(() => {
+    this._places.next(updatedPlaces);
+  })
+  );
 }
-
+}
