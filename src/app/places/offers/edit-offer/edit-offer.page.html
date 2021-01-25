@@ -7,7 +7,7 @@
     </ion-buttons>
     <ion-title>Edit Offer</ion-title>
     <ion-buttons slot="primary">
-      <ion-button (click)="onUpdateOffer()" [disabled]="!form.valid">
+      <ion-button (click)="onUpdateOffer()" [disabled]="!form?.valid">
         <ion-icon name="checkmark" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -15,12 +15,15 @@
 </ion-header>
 
 <ion-content class="ion-padding"> 
-  <form [formGroup]="form">
+  <div *ngIf="isLoading" class="ion-text-center">
+    <ion-spinner color="primary"></ion-spinner>
+  </div>
+  <form [formGroup]="form" *ngIf="!isLoading">
     <ion-grid>
       <ion-row>
         <ion-col size-sm="6" offset-sm="3">
-<ion-item>
-  <ion-label position="floating">Title</ion-label>
+          <ion-item>
+            <ion-label position="floating">Title</ion-label>
       <ion-input 
       type="text" 
       autocomplete
@@ -30,7 +33,6 @@
       </ion-item>
     </ion-col>
   </ion-row>
-
   <ion-row>
     <ion-col size-sm="6" offset-sm="3">
       <ion-item>
@@ -39,17 +41,14 @@
       </ion-item> 
     </ion-col>
   </ion-row>
-
-  <ion-row *ngIf="
+  <ion-row 
+  *ngIf="
   !form.get('description').valid && form.get('description').touched
 ">
     <ion-col size-sm="6" offset-sm="3">
       <p>Description must be between 1 and 180 characters.</p>
     </ion-col>
-  </ion-row>
-
- 
+  </ion-row> 
 </ion-grid>
 </form>
-
 </ion-content>
