@@ -52,7 +52,7 @@ export class LocationPickerComponent implements OnInit {
           });
         // .subscribe(
         //   address => {
-        //     console.log(address);
+         //    console.log(address);
         //   }
         // );
 
