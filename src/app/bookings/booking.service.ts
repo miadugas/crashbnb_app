@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { delay, map, switchMap, take, tap } from "rxjs/operators";
+import { map, switchMap, take, tap } from "rxjs/operators";
 
 import { Booking } from './booking.model';
 import { AuthService } from '../auth/auth.service';
@@ -43,6 +43,7 @@ export class BookingService {
     dateTo: Date
   ) {
     let generatedId: string;
+
     const newBooking = new Booking(
       Math.random().toString(),
       placeId,
@@ -55,6 +56,7 @@ export class BookingService {
       dateFrom,
       dateTo
     );
+    
     return this.http
       .post<{ name: string }>(
         'https://iloftz-default-rtdb.firebaseio.com/bookings.json',
