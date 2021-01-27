@@ -1,5 +1,7 @@
 {
   "name": "Crash",
-  "integrations": {},
+  "integrations": {
+    "capacitor": {}
+  },
   "type": "angular"
 }
