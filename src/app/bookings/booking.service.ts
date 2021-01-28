@@ -40,16 +40,23 @@ export class BookingService {
   ) {
     let generatedId: string;
     let newBooking: Booking;
+    let fetchedUserId: string;
     return this.authService.userId.pipe(
       take(1),
       switchMap(userId => {
         if (!userId) {
           throw new Error('No user id found!');
         }
+        fetchedUserId = userId;
+        return this.authService.token;
+      }),
+
+take(1),
+      switchMap(token => {
         newBooking = new Booking(
           Math.random().toString(),
           placeId,
-          userId,
+          fetchedUserId,
           placeTitle,
           placeImage,
           firstName,
@@ -58,12 +65,11 @@ export class BookingService {
           dateFrom,
           dateTo
         );
-        return this.http
-        .post<{ name: string }>(
-          'https://iloftz-default-rtdb.firebaseio.com/bookings.json',
-          { ...newBooking, id: null }
-        );
-      }),
+         return this.http.post<{ name: string }>(
+           `https://iloftz-default-rtdb.firebaseio.com/bookings.json?auth=${token}`,
+           { ...newBooking, id: null }
+         );
+       }),
       switchMap(resData => {
         generatedId = resData.name;
         return this.bookings;
@@ -77,12 +83,13 @@ export class BookingService {
   }
 
   cancelBooking(bookingId: string) {
-    return this.http
-       .delete(
-         `https://iloftz-default-rtdb.firebaseio.com/bookings/${bookingId}.json`
-       )
-
-      .pipe(
+    return this.authService.token.pipe(
+      take(1),
+      switchMap(token => {
+        return this.http.delete(
+         `https://iloftz-default-rtdb.firebaseio.com/bookings/${bookingId}.json?auth=${token}`
+         );
+        }),
         switchMap(() => {
           return this.bookings;
         }),
@@ -91,16 +98,23 @@ export class BookingService {
           this._bookings.next(bookings.filter(b => b.id !== bookingId));
         })
       );
-  }
+    }
 
-  fetchBookings() {
-    return this.authService.userId.pipe(
-      switchMap(userId => {
-        if (!userId) {
-          throw new Error('User not found!');
-        }
-        return this.http.get<{ [key: string]: BookingData }>(
-      `https://iloftz-default-rtdb.firebaseio.com/bookings.json?orderBy="userId"&equalTo="${userId}"`
+    fetchBookings() {
+      let fetchedUserId: string;
+      return this.authService.userId.pipe(
+        take(1),
+        switchMap(userId => {
+          if (!userId) {
+            throw new Error('User not found!');
+          }
+          fetchedUserId = userId;
+          return this.authService.token;
+        }),
+        take(1),
+        switchMap(token => {
+          return this.http.get<{ [key: string]: BookingData }>(
+      `https://iloftz-default-rtdb.firebaseio.com/bookings.json?orderBy="userId"&equalTo="${fetchedUserId}"&auth=${token}`
         );
       }),
       map(bookingData => {
