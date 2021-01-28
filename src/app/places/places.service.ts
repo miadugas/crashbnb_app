@@ -142,37 +142,43 @@ export class PlacesService {
     imageUrl: string
   ) {
     let generatedId: string;
-    const newPlace = new Place(
-      Math.random().toString(),
-      title,
-      description,
-      imageUrl,
-      price,
-      dateFrom,
-      dateTo,
-      this.authService.userId,
-      location
-    );
-    return this.http
-      .post<{ name: string }>(
+    let newPlace: Place;
+    return this.authService.userId.pipe(
+      take(1),
+      switchMap(userId => {
+        if (!userId) {
+          throw new Error('No user found!');
+        }
+        newPlace = new Place(
+          Math.random().toString(),
+          title,
+          description,
+          imageUrl,
+          price,
+          dateFrom,
+          dateTo,
+          userId,
+          location
+        );
+
+    return this.http.post<{ name: string }>(
         'https://iloftz-default-rtdb.firebaseio.com/offered-places.json',
         {
           ...newPlace,
           id: null
         }
-      )
-
-      .pipe(
-        switchMap(resData => {
-          generatedId = resData.name;
-          return this.places;
-        }),
-        take(1),
-        tap(places => {
-          newPlace.id = generatedId;
-          this._places.next(places.concat(newPlace));
-        })
       );
+    }),
+    switchMap(resData => {
+      generatedId = resData.name;
+      return this.places;
+    }),
+    take(1),
+    tap(places => {
+      newPlace.id = generatedId;
+      this._places.next(places.concat(newPlace));
+    })
+  );
     // return this.places.pipe(
     //   take(1), delay(1000),
     //   tap(places => {       
@@ -186,13 +192,14 @@ updatePlace(placeId: string, title: string, description: string) {
   let updatedPlaces: Place[];
   return this.places.pipe(
     take(1),
-      switchMap(places => {
-        if (!places || places.length <= 0) {
-          return this.fetchPlaces();
-        } else {
-          return of(places);
-        }
-  }),
+    switchMap(places => {
+      if (!places || places.length <= 0) {
+        return this.fetchPlaces();
+      } else {
+        return of(places);
+      }
+    }),
+
   switchMap(places => {
     const updatedPlaceIndex = places.findIndex(pl => pl.id === placeId);
     updatedPlaces = [...places];

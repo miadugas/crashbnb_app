@@ -1,11 +1,10 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
-import { map, switchMap, take, tap } from "rxjs/operators";
+import { take, tap, delay, switchMap, map } from 'rxjs/operators';
 
 import { Booking } from './booking.model';
 import { AuthService } from '../auth/auth.service';
-
 
 interface BookingData {
   bookedFrom: string;
@@ -27,10 +26,7 @@ export class BookingService {
     return this._bookings.asObservable();
   }
 
-  constructor(
-    private authService: AuthService,
-    private http: HttpClient
-    ) {}
+  constructor(private authService: AuthService, private http: HttpClient) {}
 
   addBooking(
     placeId: string,
@@ -43,44 +39,50 @@ export class BookingService {
     dateTo: Date
   ) {
     let generatedId: string;
-
-    const newBooking = new Booking(
-      Math.random().toString(),
-      placeId,
-      this.authService.userId,
-      placeTitle,
-      placeImage,
-      firstName,
-      lastName,
-      guestNumber,
-      dateFrom,
-      dateTo
+    let newBooking: Booking;
+    return this.authService.userId.pipe(
+      take(1),
+      switchMap(userId => {
+        if (!userId) {
+          throw new Error('No user id found!');
+        }
+        newBooking = new Booking(
+          Math.random().toString(),
+          placeId,
+          userId,
+          placeTitle,
+          placeImage,
+          firstName,
+          lastName,
+          guestNumber,
+          dateFrom,
+          dateTo
+        );
+        return this.http
+        .post<{ name: string }>(
+          'https://iloftz-default-rtdb.firebaseio.com/bookings.json',
+          { ...newBooking, id: null }
+        );
+      }),
+      switchMap(resData => {
+        generatedId = resData.name;
+        return this.bookings;
+      }),
+      take(1),
+      tap(bookings => {
+        newBooking.id = generatedId;
+        this._bookings.next(bookings.concat(newBooking));
+      })
     );
-    
-    return this.http
-      .post<{ name: string }>(
-        'https://iloftz-default-rtdb.firebaseio.com/bookings.json',
-        { ...newBooking, id: null }
-      )
-      .pipe(
-        switchMap(resData => {
-          generatedId = resData.name;
-          return this.bookings;
-        }),
-        take(1),
-        tap(bookings => {
-          newBooking.id = generatedId;
-          this._bookings.next(bookings.concat(newBooking));
-        })
-      );
   }
 
-   cancelBooking(bookingId: string) {
-     return this.http
+  cancelBooking(bookingId: string) {
+    return this.http
        .delete(
          `https://iloftz-default-rtdb.firebaseio.com/bookings/${bookingId}.json`
        )
-       .pipe(
+
+      .pipe(
         switchMap(() => {
           return this.bookings;
         }),
@@ -88,43 +90,44 @@ export class BookingService {
         tap(bookings => {
           this._bookings.next(bookings.filter(b => b.id !== bookingId));
         })
-       );
-   }
-   
-   fetchBookings() {
-     return this.http
-       .get<{ [key: string]: BookingData }>(
-         `https://iloftz-default-rtdb.firebaseio.com/bookings.json?orderBy="userId"&equalTo="${
-           this.authService.userId
-         }"`
-       )
-       .pipe(
-         map(bookingData => {
-           const bookings = [];
-           for (const key in bookingData) {
-             if (bookingData.hasOwnProperty(key)) {
-               bookings.push(
-                 new Booking(
-                  key,
-                  bookingData[key].placeId,
-                  bookingData[key].userId,
-                  bookingData[key].placeTitle,
-                  bookingData[key].placeImage,
-                  bookingData[key].firstName,
-                  bookingData[key].lastName,
-                  bookingData[key].guestNumber,
-                  new Date(bookingData[key].bookedFrom),
-                  new Date(bookingData[key].bookedTo)
-                )
-               );
-             }
-           }
-          return bookings;
-         }),
-         tap(bookings => {
-           this._bookings.next(bookings);
-         })
       );
-   }
-}
+  }
 
+  fetchBookings() {
+    return this.authService.userId.pipe(
+      switchMap(userId => {
+        if (!userId) {
+          throw new Error('User not found!');
+        }
+        return this.http.get<{ [key: string]: BookingData }>(
+      `https://iloftz-default-rtdb.firebaseio.com/bookings.json?orderBy="userId"&equalTo="${userId}"`
+        );
+      }),
+      map(bookingData => {
+        const bookings = [];
+        for (const key in bookingData) {
+          if (bookingData.hasOwnProperty(key)) {
+            bookings.push(
+              new Booking(
+                key,
+                bookingData[key].placeId,
+                bookingData[key].userId,
+                bookingData[key].placeTitle,
+                bookingData[key].placeImage,
+                bookingData[key].firstName,
+                bookingData[key].lastName,
+                bookingData[key].guestNumber,
+                new Date(bookingData[key].bookedFrom),
+                new Date(bookingData[key].bookedTo)
+              )
+            );
+          }
+        }
+        return bookings;
+      }),
+      tap(bookings => {
+        this._bookings.next(bookings);
+      })
+    );
+  }
+      }
