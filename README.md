@@ -8,7 +8,7 @@ Design concept by Mia Dugas & made with Ionic & Angular.
 ![Image of iLoftz](https://github.com/miadugas/crashbnb_app/blob/main/prototype-iLoftz-001.png)
 
 =======
-Google Maps, Geocoding
+Google Maps, Geocoding, Camera access
 
 
 
