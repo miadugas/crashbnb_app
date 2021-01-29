@@ -5,7 +5,7 @@ This app will be a hybrid AirBnB / Yelp app for couch surfers where users can cr
 
 Design concept by Mia Dugas & made with Ionic & Angular.
 
-![Image of iLoftz](https://github.com/miadugas/crashbnb_app/blob/main/prototype-iLoftz-001.png)
+![Image of iLoftz](https://github.com/miadugas/iLoftz_app/blob/main/preview-Loftz.jpg)
 
 =======
 Google Maps, Geocoding, Camera access, Firebase, User Auth.
