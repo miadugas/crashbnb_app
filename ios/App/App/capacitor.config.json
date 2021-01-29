@@ -1,6 +1,6 @@
 {
-  "appId": "io.ionic.starter",
-  "appName": "Crash",
+  "appId": "com.ionic.loftz",
+  "appName": "Loftz",
   "bundledWebRuntime": false,
   "npmClient": "npm",
   "webDir": "www",

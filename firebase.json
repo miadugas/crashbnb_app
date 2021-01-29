@@ -1,4 +1,7 @@
 {
+  "database": {
+    "rules": "iLoftz-firebase-admin.json"
+  },
   "hosting": {
     "public": "www",
     "ignore": [

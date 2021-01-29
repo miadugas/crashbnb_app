@@ -1,0 +1,9 @@
+{
+  "rules": {
+    ".read": "auth != null",  // 2021-2-24
+    ".write": "auth != null",  // 2021-2-24
+      "bookings": {
+        ".indexOn": ["userId"]
+      }
+  }
+}
